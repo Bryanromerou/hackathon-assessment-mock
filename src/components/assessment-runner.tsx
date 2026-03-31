@@ -1,17 +1,14 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { useTimingAnalyzer } from "@/hooks/use-timing-analyzer";
-import { useBrowserDetector } from "@/hooks/use-browser-detector";
 import type { Question } from "@/lib/types";
 
 interface AssessmentRunnerProps {
   questions: Question[];
-  sessionId: string;
   onComplete: () => void;
 }
 
@@ -24,41 +21,19 @@ const CATEGORY_COLORS: Record<string, string> = {
 
 export function AssessmentRunner({
   questions,
-  sessionId,
   onComplete,
 }: AssessmentRunnerProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [elapsed, setElapsed] = useState(0);
   const timerRef = useRef<ReturnType<typeof setInterval>>(null);
 
-  const sendSignal = useCallback(
-    async (signal: { type: string; metadata: Record<string, unknown> }) => {
-      try {
-        await fetch(`/api/session/${sessionId}/signal`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ ...signal, source: "browser" }),
-        });
-      } catch {
-        /* best effort */
-      }
-    },
-    [sessionId]
-  );
-
-  const { startQuestion, endQuestion } = useTimingAnalyzer(sendSignal);
-  useBrowserDetector(true, sendSignal);
-
   const question = questions[currentIndex];
   const progress = (currentIndex / questions.length) * 100;
 
-  // Start timer for current question
   useEffect(() => {
     if (!question) return;
 
-    startQuestion(question.id, question.category);
     setElapsed(0);
-
     const start = Date.now();
     timerRef.current = setInterval(() => {
       setElapsed(Date.now() - start);
@@ -67,34 +42,11 @@ export function AssessmentRunner({
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
     };
-  }, [currentIndex, question, startQuestion]);
+  }, [currentIndex, question]);
 
-  async function handleAnswer(optionIndex: number) {
+  function handleAnswer() {
     if (!question) return;
-
     if (timerRef.current) clearInterval(timerRef.current);
-
-    const timing = endQuestion(question.id);
-
-    // Save response to DB
-    try {
-      await fetch(`/api/session/${sessionId}/signal`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          type: "answer-recorded",
-          source: "browser",
-          metadata: {
-            questionId: question.id,
-            selectedOption: optionIndex,
-            responseTimeMs: timing?.elapsedMs ?? elapsed,
-            timingSeverity: timing?.severity ?? "normal",
-          },
-        }),
-      });
-    } catch {
-      /* best effort */
-    }
 
     if (currentIndex + 1 >= questions.length) {
       onComplete();
@@ -136,7 +88,7 @@ export function AssessmentRunner({
                 key={i}
                 variant="outline"
                 className="w-full justify-start text-left h-auto py-3 px-4"
-                onClick={() => handleAnswer(i)}
+                onClick={() => handleAnswer()}
               >
                 {option}
               </Button>
