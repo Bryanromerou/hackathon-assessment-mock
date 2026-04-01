@@ -21,7 +21,6 @@ const DANGER_TYPES = [
 const WARNING_TYPES = [
   // Browser-detected
   'dom-mutation',
-  // TODO: 'focus-loss' should become a hard warning in the future (tab navigation detection)
   'focus-loss',
   'suspicious-shortcut',
   'clipboard-event',
@@ -51,7 +50,9 @@ const HARD_WARNING_TYPES = [
   'extension-installed',
   // Integrity app closed
   'companion-app-closed',
-  // TODO: Add 'focus-loss' here once tab-navigation is classified as a hard warning
+  // Tab/window navigation — only non-suppressed signals reach the backend
+  // (switching to the companion app is allowed by the Electron suppression logic)
+  'focus-loss',
 ];
 
 export function isHardWarning(signalType: string): boolean {
