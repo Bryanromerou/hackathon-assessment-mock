@@ -3,29 +3,17 @@ import { pushSSE } from "./sse";
 import { getSignalSeverity, recalculateScore } from "./integrity-scoring";
 import type { SessionStatus, SignalSource } from "./types";
 
-function generatePairingCode(): string {
-  return Math.floor(100000 + Math.random() * 900000).toString();
-}
-
 export async function createSession() {
   const session = await prisma.session.create({
-    data: {
-      pairingCode: generatePairingCode(),
-    },
+    data: {},
   });
-  return { sessionId: session.id, pairingCode: session.pairingCode };
+  return { sessionId: session.id };
 }
 
 export async function getSession(id: string) {
   return prisma.session.findUnique({
     where: { id },
     include: { signals: true, responses: true },
-  });
-}
-
-export async function getSessionByPairingCode(pairingCode: string) {
-  return prisma.session.findUnique({
-    where: { pairingCode },
   });
 }
 

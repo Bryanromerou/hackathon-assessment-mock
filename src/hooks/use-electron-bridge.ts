@@ -13,12 +13,11 @@ interface ElectronBridgeState {
 
 /**
  * WebSocket bridge between the assessment browser and the Electron
- * companion app. Forwards browser-detected signals to Electron's
- * local WS server so they appear in the aggregator alongside OS-level
- * signals. Also exposes connection status so the UI can indicate
- * whether the companion app is reachable.
+ * companion app. On connection, sends the sessionId so the companion
+ * can auto-pair with the assessment backend. Also forwards browser-detected
+ * signals to Electron's local WS server.
  */
-export function useElectronBridge(enabled: boolean) {
+export function useElectronBridge(enabled: boolean, sessionId: string | null) {
   const [state, setState] = useState<ElectronBridgeState>({
     connected: false,
     electronReady: false,
@@ -28,6 +27,8 @@ export function useElectronBridge(enabled: boolean) {
   const pingTimer = useRef<ReturnType<typeof setInterval> | null>(null);
   const enabledRef = useRef(enabled);
   enabledRef.current = enabled;
+  const sessionIdRef = useRef(sessionId);
+  sessionIdRef.current = sessionId;
 
   const cleanup = useCallback(() => {
     if (pingTimer.current) {
@@ -55,6 +56,16 @@ export function useElectronBridge(enabled: boolean) {
 
       ws.onopen = () => {
         setState((prev) => ({ ...prev, connected: true }));
+
+        // Send sessionId for auto-pairing
+        if (sessionIdRef.current) {
+          ws.send(
+            JSON.stringify({
+              type: "auto-pair",
+              payload: { sessionId: sessionIdRef.current },
+            })
+          );
+        }
 
         // Start keepalive pings
         pingTimer.current = setInterval(() => {
@@ -132,9 +143,18 @@ export function useElectronBridge(enabled: boolean) {
     []
   );
 
+  const sendStatus = useCallback((status: string) => {
+    if (wsRef.current?.readyState === WebSocket.OPEN) {
+      wsRef.current.send(
+        JSON.stringify({ type: "status-update", payload: { status } })
+      );
+    }
+  }, []);
+
   return {
     connected: state.connected,
     electronReady: state.electronReady,
     sendSignal,
+    sendStatus,
   };
 }

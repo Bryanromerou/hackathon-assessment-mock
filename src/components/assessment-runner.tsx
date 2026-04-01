@@ -32,7 +32,7 @@ export function AssessmentRunner({
   const [elapsed, setElapsed] = useState(0);
   const timerRef = useRef<ReturnType<typeof setInterval>>(null);
 
-  const { sendSignal: sendToElectron } = useElectronBridge(true);
+  const { sendSignal: sendToElectron } = useElectronBridge(true, sessionId);
 
   const sendSignal = useCallback(
     async (signal: { type: string; metadata: Record<string, unknown> }) => {

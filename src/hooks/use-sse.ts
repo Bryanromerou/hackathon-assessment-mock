@@ -18,6 +18,8 @@ interface SSEState {
   details?: Record<string, unknown>;
 }
 
+const POLL_INTERVAL_MS = 2000;
+
 export function useSSE(sessionId: string | null) {
   const [state, setState] = useState<SSEState>({
     status: "waiting_for_companion",
@@ -35,6 +37,7 @@ export function useSSE(sessionId: string | null) {
     }
   }, []);
 
+  // SSE connection for real-time events
   useEffect(() => {
     if (!sessionId) return;
 
@@ -76,6 +79,40 @@ export function useSSE(sessionId: string | null) {
       es.close();
       eventSourceRef.current = null;
     };
+  }, [sessionId]);
+
+  // Polling fallback — SSE push events can be silently lost when the
+  // ReadableStream controller is enqueued from a different request context.
+  // Poll the DB-backed endpoint to catch status changes the SSE missed.
+  useEffect(() => {
+    if (!sessionId) return;
+
+    const poll = async () => {
+      try {
+        const res = await fetch(`/api/session/${sessionId}/poll`);
+        if (!res.ok) return;
+        const data = await res.json();
+
+        setState((prev) => {
+          if (
+            data.status !== prev.status ||
+            data.integrityScore !== prev.integrityScore
+          ) {
+            return {
+              ...prev,
+              status: data.status,
+              integrityScore: data.integrityScore,
+            };
+          }
+          return prev;
+        });
+      } catch {
+        // Network error — ignore, will retry next interval
+      }
+    };
+
+    const id = setInterval(poll, POLL_INTERVAL_MS);
+    return () => clearInterval(id);
   }, [sessionId]);
 
   return { ...state, disconnect };

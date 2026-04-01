@@ -5,7 +5,10 @@ interface PausedOverlayProps {
 }
 
 export function PausedOverlay({ details }: PausedOverlayProps) {
-  const reason = (details?.reason as string) ?? "a prohibited application";
+  const apps = (details?.apps as string[]) ?? [];
+  const reason = apps.length > 0
+    ? apps.join(", ")
+    : (details?.reason as string) ?? "a prohibited application";
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/90 backdrop-blur-sm">
@@ -30,7 +33,8 @@ export function PausedOverlay({ details }: PausedOverlayProps) {
         </h2>
         <p className="text-muted-foreground">
           Our system detected <strong>{reason}</strong> running on your
-          device. Please close it to resume the assessment.
+          device. Please close {apps.length === 1 ? "it" : "them"} and check the
+          Integrity Companion App for details.
         </p>
         <p className="text-sm text-muted-foreground">
           The assessment will automatically resume once the issue is resolved.

@@ -16,38 +16,16 @@ import type { Question } from "@/lib/types";
 function AssessmentContent() {
   const searchParams = useSearchParams();
   const sessionId = searchParams.get("session");
-  const [pairingCode, setPairingCode] = useState<string | null>(null);
   const [questions, setQuestions] = useState<Question[]>([]);
   const [started, setStarted] = useState(false);
 
   const { status, integrityScore, signals, connected, details } =
     useSSE(sessionId);
-  const { connected: electronConnected } = useElectronBridge(
-    status !== "waiting_for_companion" && status !== "completed"
-  );
-
-  // Fetch the pairing code on mount
-  useEffect(() => {
-    if (!sessionId) return;
-
-    fetch(`/api/session/${sessionId}/status`, { method: "GET" }).catch(
-      () => {}
-    );
-
-    // We need to get the pairing code from the session
-    // The SSE connection handles status updates, but we need the code from the DB
-    async function fetchSession() {
-      // We'll use the create response stored in the URL, but since we redirected
-      // we need to fetch it. For simplicity, read from a simple endpoint.
-      // The pairing code was returned when the session was created.
-      // We'll store it in sessionStorage during the redirect.
-      const stored = sessionStorage.getItem(`pairing-${sessionId}`);
-      if (stored) {
-        setPairingCode(stored);
-      }
-    }
-    fetchSession();
-  }, [sessionId]);
+  const {
+    connected: electronConnected,
+    electronReady,
+    sendStatus,
+  } = useElectronBridge(status !== "completed", sessionId);
 
   // Fetch questions when status becomes ready
   useEffect(() => {
@@ -68,21 +46,23 @@ function AssessmentContent() {
   const handleBegin = useCallback(async () => {
     if (!sessionId) return;
     setStarted(true);
+    sendStatus("in_progress");
     await fetch(`/api/session/${sessionId}/status`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ status: "in_progress" }),
     });
-  }, [sessionId]);
+  }, [sessionId, sendStatus]);
 
   const handleComplete = useCallback(async () => {
     if (!sessionId) return;
+    sendStatus("completed");
     await fetch(`/api/session/${sessionId}/status`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ status: "completed" }),
     });
-  }, [sessionId]);
+  }, [sessionId, sendStatus]);
 
   if (!sessionId) {
     return (
@@ -103,12 +83,8 @@ function AssessmentContent() {
       )}
 
       <main className="flex-1 flex items-center justify-center p-6">
-        {status === "waiting_for_companion" && pairingCode && (
-          <PairingCode pairingCode={pairingCode} connected={connected} />
-        )}
-
-        {status === "waiting_for_companion" && !pairingCode && (
-          <PairingCode pairingCode="------" connected={connected} />
+        {status === "waiting_for_companion" && (
+          <PairingCode connected={electronConnected} electronReady={electronReady} />
         )}
 
         {(status === "paired" || status === "pre_check") && (
