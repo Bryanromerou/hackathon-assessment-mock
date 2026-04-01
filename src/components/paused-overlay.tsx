@@ -6,6 +6,7 @@ interface PausedOverlayProps {
 
 export function PausedOverlay({ details }: PausedOverlayProps) {
   const apps = (details?.apps as string[]) ?? [];
+  const isCompanionClosed = details?.reason === "companion-app-closed";
   const reason = apps.length > 0
     ? apps.join(", ")
     : (details?.reason as string) ?? "a prohibited application";
@@ -31,14 +32,30 @@ export function PausedOverlay({ details }: PausedOverlayProps) {
         <h2 className="text-2xl font-bold text-destructive">
           Assessment Paused
         </h2>
-        <p className="text-muted-foreground">
-          Our system detected <strong>{reason}</strong> running on your
-          device. Please close {apps.length === 1 ? "it" : "them"} and check the
-          Integrity Companion App for details.
-        </p>
-        <p className="text-sm text-muted-foreground">
-          The assessment will automatically resume once the issue is resolved.
-        </p>
+        {isCompanionClosed ? (
+          <>
+            <p className="text-muted-foreground">
+              The <strong>Integrity Companion App</strong> has been closed.
+              Please reopen it before proceeding with the assessment.
+            </p>
+            <p className="text-sm text-muted-foreground">
+              The assessment will automatically resume once the Integrity
+              Companion App is running and reconnected.
+            </p>
+          </>
+        ) : (
+          <>
+            <p className="text-muted-foreground">
+              Our system detected <strong>{reason}</strong> running on your
+              device. Please close {apps.length === 1 ? "it" : "them"} and
+              check the Integrity Companion App for details.
+            </p>
+            <p className="text-sm text-muted-foreground">
+              The assessment will automatically resume once the issue is
+              resolved.
+            </p>
+          </>
+        )}
       </div>
     </div>
   );

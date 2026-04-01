@@ -5,6 +5,8 @@ import { useEffect, useRef, useState, useCallback } from "react";
 const ELECTRON_WS_URL = "ws://localhost:18329";
 const RECONNECT_DELAY_MS = 3000;
 const PING_INTERVAL_MS = 10000;
+const DISCONNECT_GRACE_MS = 5000;
+const ACTIVE_STATUSES = ["paired", "pre_check", "ready", "in_progress", "paused"];
 
 interface ElectronBridgeState {
   connected: boolean;
@@ -17,7 +19,7 @@ interface ElectronBridgeState {
  * can auto-pair with the assessment backend. Also forwards browser-detected
  * signals to Electron's local WS server.
  */
-export function useElectronBridge(enabled: boolean, sessionId: string | null) {
+export function useElectronBridge(enabled: boolean, sessionId: string | null, currentStatus?: string) {
   const [state, setState] = useState<ElectronBridgeState>({
     connected: false,
     electronReady: false,
@@ -25,12 +27,19 @@ export function useElectronBridge(enabled: boolean, sessionId: string | null) {
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pingTimer = useRef<ReturnType<typeof setInterval> | null>(null);
+  const disconnectGraceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const enabledRef = useRef(enabled);
   enabledRef.current = enabled;
   const sessionIdRef = useRef(sessionId);
   sessionIdRef.current = sessionId;
+  const statusRef = useRef(currentStatus);
+  statusRef.current = currentStatus;
 
   const cleanup = useCallback(() => {
+    if (disconnectGraceTimer.current) {
+      clearTimeout(disconnectGraceTimer.current);
+      disconnectGraceTimer.current = null;
+    }
     if (pingTimer.current) {
       clearInterval(pingTimer.current);
       pingTimer.current = null;
@@ -55,9 +64,17 @@ export function useElectronBridge(enabled: boolean, sessionId: string | null) {
       wsRef.current = ws;
 
       ws.onopen = () => {
+        // Cancel disconnect grace timer — reconnection succeeded
+        if (disconnectGraceTimer.current) {
+          clearTimeout(disconnectGraceTimer.current);
+          disconnectGraceTimer.current = null;
+        }
+
         setState((prev) => ({ ...prev, connected: true }));
 
         // Send sessionId for auto-pairing
+        // Electron's auto-pair handler checks the backend status and
+        // resumes the session if it was in_progress/paused.
         if (sessionIdRef.current) {
           ws.send(
             JSON.stringify({
@@ -92,6 +109,39 @@ export function useElectronBridge(enabled: boolean, sessionId: string | null) {
           clearInterval(pingTimer.current);
           pingTimer.current = null;
         }
+
+        // If the assessment is active, start a grace period before flagging
+        // the companion app as closed (treated like AI service detection)
+        const sid = sessionIdRef.current;
+        if (sid && ACTIVE_STATUSES.includes(statusRef.current ?? "")) {
+          disconnectGraceTimer.current = setTimeout(async () => {
+            try {
+              await fetch(`/api/session/${sid}/signal`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  type: "companion-app-closed",
+                  metadata: { reason: "browser-detected-disconnect" },
+                  source: "browser",
+                }),
+              });
+              await fetch(`/api/session/${sid}/status`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  status: "paused",
+                  details: {
+                    reason: "companion-app-closed",
+                    apps: ["Integrity Companion App"],
+                  },
+                }),
+              });
+            } catch {
+              // best effort
+            }
+          }, DISCONNECT_GRACE_MS);
+        }
+
         // Auto-reconnect
         if (enabledRef.current) {
           reconnectTimer.current = setTimeout(connect, RECONNECT_DELAY_MS);

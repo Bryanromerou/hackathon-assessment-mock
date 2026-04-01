@@ -25,7 +25,7 @@ function AssessmentContent() {
     connected: electronConnected,
     electronReady,
     sendStatus,
-  } = useElectronBridge(status !== "completed", sessionId);
+  } = useElectronBridge(status !== "completed", sessionId, status);
 
   // Fetch questions when status becomes ready
   useEffect(() => {
@@ -103,11 +103,12 @@ function AssessmentContent() {
           </div>
         )}
 
-        {(status === "in_progress" || (status === "ready" && started)) &&
+        {(status === "in_progress" || status === "paused" || (status === "ready" && started)) &&
           questions.length > 0 && (
             <AssessmentRunner
               questions={questions}
               sessionId={sessionId}
+              paused={status === "paused"}
               onComplete={handleComplete}
             />
           )}
