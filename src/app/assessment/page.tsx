@@ -1,21 +1,21 @@
-"use client";
+'use client';
 
-import { useSearchParams } from "next/navigation";
-import { useState, useEffect, useCallback, Suspense } from "react";
-import { useSSE } from "@/hooks/use-sse";
-import { useElectronBridge } from "@/hooks/use-electron-bridge";
-import { PairingCode } from "@/components/pairing-code";
-import { PreCheckStatus } from "@/components/pre-check-status";
-import { AssessmentRunner } from "@/components/assessment-runner";
-import { IntegrityBanner } from "@/components/integrity-banner";
-import { PausedOverlay } from "@/components/paused-overlay";
-import { CompletionSummary } from "@/components/completion-summary";
-import { Button } from "@/components/ui/button";
-import type { Question } from "@/lib/types";
+import { useSearchParams } from 'next/navigation';
+import { useState, useEffect, useCallback, Suspense } from 'react';
+import { useSSE } from '@/hooks/use-sse';
+import { useElectronBridge } from '@/hooks/use-electron-bridge';
+import { PairingCode } from '@/components/pairing-code';
+import { PreCheckStatus } from '@/components/pre-check-status';
+import { AssessmentRunner } from '@/components/assessment-runner';
+import { IntegrityBanner } from '@/components/integrity-banner';
+import { PausedOverlay } from '@/components/paused-overlay';
+import { CompletionSummary } from '@/components/completion-summary';
+import { Button } from '@/components/ui/button';
+import type { Question } from '@/lib/types';
 
 function AssessmentContent() {
   const searchParams = useSearchParams();
-  const sessionId = searchParams.get("session");
+  const sessionId = searchParams.get('session');
   const [questions, setQuestions] = useState<Question[]>([]);
   const [started, setStarted] = useState(false);
 
@@ -25,12 +25,12 @@ function AssessmentContent() {
     connected: electronConnected,
     electronReady,
     sendStatus,
-  } = useElectronBridge(status !== "completed", sessionId, status);
+  } = useElectronBridge(status !== 'completed', sessionId, status);
 
   // Fetch questions when status becomes ready
   useEffect(() => {
     if (!sessionId) return;
-    if (status !== "ready" && status !== "in_progress") return;
+    if (status !== 'ready' && status !== 'in_progress') return;
     if (questions.length > 0) return;
 
     async function fetchQuestions() {
@@ -46,21 +46,21 @@ function AssessmentContent() {
   const handleBegin = useCallback(async () => {
     if (!sessionId) return;
     setStarted(true);
-    sendStatus("in_progress");
+    sendStatus('in_progress');
     await fetch(`/api/session/${sessionId}/status`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ status: "in_progress" }),
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: 'in_progress' }),
     });
   }, [sessionId, sendStatus]);
 
   const handleComplete = useCallback(async () => {
     if (!sessionId) return;
-    sendStatus("completed");
+    sendStatus('completed');
     await fetch(`/api/session/${sessionId}/status`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ status: "completed" }),
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: 'completed' }),
     });
   }, [sessionId, sendStatus]);
 
@@ -74,24 +74,31 @@ function AssessmentContent() {
     );
   }
 
-  const showBanner = status !== "waiting_for_companion";
+  const showBanner = status !== 'waiting_for_companion';
 
   return (
     <div className="min-h-screen flex flex-col">
       {showBanner && (
-        <IntegrityBanner score={integrityScore} signalCount={signals.length} electronConnected={electronConnected} />
+        <IntegrityBanner
+          score={integrityScore}
+          signalCount={signals.length}
+          electronConnected={electronConnected}
+        />
       )}
 
       <main className="flex-1 flex items-center justify-center p-6">
-        {status === "waiting_for_companion" && (
-          <PairingCode connected={electronConnected} electronReady={electronReady} />
+        {status === 'waiting_for_companion' && (
+          <PairingCode
+            connected={electronConnected}
+            electronReady={electronReady}
+          />
         )}
 
-        {(status === "paired" || status === "pre_check") && (
+        {(status === 'paired' || status === 'pre_check') && (
           <PreCheckStatus details={details} />
         )}
 
-        {status === "ready" && !started && (
+        {status === 'ready' && !started && (
           <div className="text-center space-y-4">
             <h2 className="text-2xl font-bold">Ready to Begin</h2>
             <p className="text-muted-foreground">
@@ -103,17 +110,19 @@ function AssessmentContent() {
           </div>
         )}
 
-        {(status === "in_progress" || status === "paused" || (status === "ready" && started)) &&
+        {(status === 'in_progress' ||
+          status === 'paused' ||
+          (status === 'ready' && started)) &&
           questions.length > 0 && (
             <AssessmentRunner
               questions={questions}
               sessionId={sessionId}
-              paused={status === "paused"}
+              paused={status === 'paused'}
               onComplete={handleComplete}
             />
           )}
 
-        {status === "completed" && (
+        {status === 'completed' && (
           <CompletionSummary
             integrityScore={integrityScore}
             signalCount={signals.length}
@@ -122,7 +131,7 @@ function AssessmentContent() {
         )}
       </main>
 
-      {status === "paused" && <PausedOverlay details={details} />}
+      {status === 'paused' && <PausedOverlay details={details} />}
     </div>
   );
 }

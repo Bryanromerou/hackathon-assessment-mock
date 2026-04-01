@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 interface PairingCodeProps {
   connected: boolean;
@@ -21,17 +21,17 @@ export function PairingCode({ connected, electronReady }: PairingCodeProps) {
           <div
             className={`h-2 w-2 rounded-full ${
               electronReady
-                ? "bg-green-500"
+                ? 'bg-green-500'
                 : connected
-                  ? "bg-yellow-500 animate-pulse"
-                  : "bg-yellow-500 animate-pulse"
+                  ? 'bg-yellow-500 animate-pulse'
+                  : 'bg-yellow-500 animate-pulse'
             }`}
           />
           {electronReady
-            ? "Connected — pairing automatically..."
+            ? 'Connected — pairing automatically...'
             : connected
-              ? "Connected — waiting for companion app..."
-              : "Looking for Companion App..."}
+              ? 'Connected — waiting for companion app...'
+              : 'Looking for Companion App...'}
         </div>
 
         <div className="text-center space-y-2">

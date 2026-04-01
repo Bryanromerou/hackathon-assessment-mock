@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 interface CompletionSummaryProps {
   integrityScore: number;
@@ -15,10 +15,10 @@ export function CompletionSummary({
 }: CompletionSummaryProps) {
   const scoreColor =
     integrityScore > 70
-      ? "text-green-500"
+      ? 'text-green-500'
       : integrityScore > 40
-        ? "text-yellow-500"
-        : "text-red-500";
+        ? 'text-yellow-500'
+        : 'text-red-500';
 
   return (
     <Card className="w-full max-w-md mx-auto">

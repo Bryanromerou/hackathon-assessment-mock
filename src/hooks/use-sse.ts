@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { useEffect, useRef, useState, useCallback } from "react";
-import type { SessionStatus, SignalSeverity, SignalSource } from "@/lib/types";
+import { useEffect, useRef, useState, useCallback } from 'react';
+import type { SessionStatus, SignalSeverity, SignalSource } from '@/lib/types';
 
 interface SSESignal {
   type: string;
@@ -22,7 +22,7 @@ const POLL_INTERVAL_MS = 2000;
 
 export function useSSE(sessionId: string | null) {
   const [state, setState] = useState<SSEState>({
-    status: "waiting_for_companion",
+    status: 'waiting_for_companion',
     integrityScore: 100,
     signals: [],
     connected: false,
@@ -52,14 +52,14 @@ export function useSSE(sessionId: string | null) {
       try {
         const data = JSON.parse(event.data);
 
-        if (data.event === "status") {
+        if (data.event === 'status') {
           setState((prev) => ({
             ...prev,
             status: data.status,
             integrityScore: data.integrityScore ?? prev.integrityScore,
             details: data.details,
           }));
-        } else if (data.event === "signal") {
+        } else if (data.event === 'signal') {
           setState((prev) => ({
             ...prev,
             integrityScore: data.integrityScore ?? prev.integrityScore,

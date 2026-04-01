@@ -1,14 +1,14 @@
-"use client";
+'use client';
 
-import { useState, useEffect, useRef, useCallback } from "react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
-import { useTimingAnalyzer } from "@/hooks/use-timing-analyzer";
-import { useBrowserDetector } from "@/hooks/use-browser-detector";
-import { useElectronBridge } from "@/hooks/use-electron-bridge";
-import type { Question } from "@/lib/types";
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
+import { useTimingAnalyzer } from '@/hooks/use-timing-analyzer';
+import { useBrowserDetector } from '@/hooks/use-browser-detector';
+import { useElectronBridge } from '@/hooks/use-electron-bridge';
+import type { Question } from '@/lib/types';
 
 interface AssessmentRunnerProps {
   questions: Question[];
@@ -18,10 +18,10 @@ interface AssessmentRunnerProps {
 }
 
 const CATEGORY_COLORS: Record<string, string> = {
-  abstract: "bg-purple-500/15 text-purple-400 border-purple-500/20",
-  verbal: "bg-sky-500/15 text-sky-400 border-sky-500/20",
-  math: "bg-yellow-500/15 text-yellow-400 border-yellow-500/20",
-  spatial: "bg-emerald-500/15 text-emerald-400 border-emerald-500/20",
+  abstract: 'bg-purple-500/15 text-purple-400 border-purple-500/20',
+  verbal: 'bg-sky-500/15 text-sky-400 border-sky-500/20',
+  math: 'bg-yellow-500/15 text-yellow-400 border-yellow-500/20',
+  spatial: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/20',
 };
 
 export function AssessmentRunner({
@@ -44,15 +44,15 @@ export function AssessmentRunner({
       // Also send directly to the assessment API
       try {
         await fetch(`/api/session/${sessionId}/signal`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ ...signal, source: "browser" }),
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ...signal, source: 'browser' }),
         });
       } catch {
         /* best effort */
       }
     },
-    [sessionId, sendToElectron]
+    [sessionId, sendToElectron],
   );
 
   const { startQuestion, endQuestion } = useTimingAnalyzer(sendSignal);
@@ -88,16 +88,16 @@ export function AssessmentRunner({
     // Save response to DB
     try {
       await fetch(`/api/session/${sessionId}/signal`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          type: "answer-recorded",
-          source: "browser",
+          type: 'answer-recorded',
+          source: 'browser',
           metadata: {
             questionId: question.id,
             selectedOption: optionIndex,
             responseTimeMs: timing?.elapsedMs ?? elapsed,
-            timingSeverity: timing?.severity ?? "normal",
+            timingSeverity: timing?.severity ?? 'normal',
           },
         }),
       });
@@ -132,7 +132,7 @@ export function AssessmentRunner({
         <CardContent className="pt-6 space-y-6">
           <Badge
             variant="outline"
-            className={CATEGORY_COLORS[question.category] ?? ""}
+            className={CATEGORY_COLORS[question.category] ?? ''}
           >
             {question.category}
           </Badge>

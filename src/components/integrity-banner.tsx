@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 interface IntegrityBannerProps {
   score: number;
@@ -6,20 +6,24 @@ interface IntegrityBannerProps {
   electronConnected?: boolean;
 }
 
-export function IntegrityBanner({ score, signalCount, electronConnected }: IntegrityBannerProps) {
+export function IntegrityBanner({
+  score,
+  signalCount,
+  electronConnected,
+}: IntegrityBannerProps) {
   const color =
     score > 70
-      ? "bg-green-500/10 text-green-600 border-green-500/20"
+      ? 'bg-green-500/10 text-green-600 border-green-500/20'
       : score > 40
-        ? "bg-yellow-500/10 text-yellow-600 border-yellow-500/20"
-        : "bg-red-500/10 text-red-600 border-red-500/20";
+        ? 'bg-yellow-500/10 text-yellow-600 border-yellow-500/20'
+        : 'bg-red-500/10 text-red-600 border-red-500/20';
 
   const label =
     score > 70
-      ? "Monitoring Active"
+      ? 'Monitoring Active'
       : score > 40
-        ? "Suspicious Activity Detected"
-        : "Integrity Compromised";
+        ? 'Suspicious Activity Detected'
+        : 'Integrity Compromised';
 
   return (
     <div
@@ -29,10 +33,10 @@ export function IntegrityBanner({ score, signalCount, electronConnected }: Integ
         <div
           className={`h-2 w-2 rounded-full ${
             score > 70
-              ? "bg-green-500"
+              ? 'bg-green-500'
               : score > 40
-                ? "bg-yellow-500"
-                : "bg-red-500 animate-pulse"
+                ? 'bg-yellow-500'
+                : 'bg-red-500 animate-pulse'
           }`}
         />
         <span className="font-medium">{label}</span>
@@ -42,11 +46,11 @@ export function IntegrityBanner({ score, signalCount, electronConnected }: Integ
           <span className="flex items-center gap-1.5">
             <span
               className={`h-1.5 w-1.5 rounded-full ${
-                electronConnected ? "bg-blue-400" : "bg-gray-400"
+                electronConnected ? 'bg-blue-400' : 'bg-gray-400'
               }`}
             />
             <span className="text-xs opacity-70">
-              {electronConnected ? "Companion" : "No companion"}
+              {electronConnected ? 'Companion' : 'No companion'}
             </span>
           </span>
         )}

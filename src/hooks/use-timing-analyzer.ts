@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { useRef, useCallback } from "react";
+import { useRef, useCallback } from 'react';
 
 const DIFFICULTY_THRESHOLDS: Record<
   string,
@@ -16,19 +16,26 @@ export interface TimingResult {
   questionId: string;
   category: string;
   elapsedMs: number;
-  severity: "normal" | "warning" | "suspicious";
+  severity: 'normal' | 'warning' | 'suspicious';
 }
 
 interface TimingState {
   questionTimings: TimingResult[];
-  currentQuestion: { questionId: string; category: string; startedAt: number } | null;
+  currentQuestion: {
+    questionId: string;
+    category: string;
+    startedAt: number;
+  } | null;
   consecutiveFastAnswers: number;
   totalQuestions: number;
   suspiciousCount: number;
 }
 
 export function useTimingAnalyzer(
-  onAnomaly: (signal: { type: string; metadata: Record<string, unknown> }) => void
+  onAnomaly: (signal: {
+    type: string;
+    metadata: Record<string, unknown>;
+  }) => void,
 ) {
   const stateRef = useRef<TimingState>({
     questionTimings: [],
@@ -62,15 +69,15 @@ export function useTimingAnalyzer(
         questionId,
         category,
         elapsedMs: elapsed,
-        severity: "normal",
+        severity: 'normal',
       };
 
       if (elapsed < thresholds.suspiciousMs) {
-        timing.severity = "suspicious";
+        timing.severity = 'suspicious';
         s.consecutiveFastAnswers++;
         s.suspiciousCount++;
       } else if (elapsed < thresholds.warningMs) {
-        timing.severity = "warning";
+        timing.severity = 'warning';
         s.consecutiveFastAnswers = 0;
       } else {
         s.consecutiveFastAnswers = 0;
@@ -80,9 +87,9 @@ export function useTimingAnalyzer(
       s.questionTimings.push(timing);
 
       // Emit anomaly signals
-      if (timing.severity === "suspicious") {
+      if (timing.severity === 'suspicious') {
         onAnomaly({
-          type: "fast-answer",
+          type: 'fast-answer',
           metadata: {
             questionId,
             category,
@@ -95,7 +102,7 @@ export function useTimingAnalyzer(
 
       if (s.consecutiveFastAnswers >= 3) {
         onAnomaly({
-          type: "consecutive-fast-answers",
+          type: 'consecutive-fast-answers',
           metadata: {
             count: s.consecutiveFastAnswers,
             recentTimings: s.questionTimings.slice(-3).map((t) => ({
@@ -111,7 +118,7 @@ export function useTimingAnalyzer(
         const ratio = s.suspiciousCount / s.totalQuestions;
         if (ratio > 0.5) {
           onAnomaly({
-            type: "high-suspicious-ratio",
+            type: 'high-suspicious-ratio',
             metadata: {
               suspicious: s.suspiciousCount,
               total: s.totalQuestions,
@@ -124,7 +131,7 @@ export function useTimingAnalyzer(
       s.currentQuestion = null;
       return timing;
     },
-    [onAnomaly]
+    [onAnomaly],
   );
 
   const getStats = useCallback(() => {
@@ -136,8 +143,8 @@ export function useTimingAnalyzer(
     return {
       total: timings.length,
       avgMs: Math.round(totalMs / timings.length),
-      suspicious: timings.filter((t) => t.severity === "suspicious").length,
-      warnings: timings.filter((t) => t.severity === "warning").length,
+      suspicious: timings.filter((t) => t.severity === 'suspicious').length,
+      warnings: timings.filter((t) => t.severity === 'warning').length,
     };
   }, []);
 

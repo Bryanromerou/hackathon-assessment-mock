@@ -14,13 +14,13 @@ const sseControllers =
   globalForSSE.sseControllers ??
   new Map<string, ReadableStreamDefaultController>();
 
-if (process.env.NODE_ENV !== "production") {
+if (process.env.NODE_ENV !== 'production') {
   globalForSSE.sseControllers = sseControllers;
 }
 
 export function setSSEController(
   sessionId: string,
-  controller: ReadableStreamDefaultController
+  controller: ReadableStreamDefaultController,
 ) {
   sseControllers.set(sessionId, controller);
 }
@@ -35,7 +35,7 @@ export function pushSSE(sessionId: string, data: Record<string, unknown>) {
 
   try {
     const encoded = new TextEncoder().encode(
-      `data: ${JSON.stringify(data)}\n\n`
+      `data: ${JSON.stringify(data)}\n\n`,
     );
     controller.enqueue(encoded);
   } catch {

@@ -35,15 +35,15 @@ A web-based cognitive assessment platform that evaluates candidates across multi
 
 ## Tech Stack
 
-| Layer | Technology |
-|-------|-----------|
-| Framework | Next.js 16 (App Router) |
-| Language | TypeScript 5 |
-| UI | React 19, Tailwind CSS 4, shadcn/ui (Base Nova) |
-| Database | SQLite (file-based) |
-| ORM | Prisma 7 with LibSQL adapter |
-| Icons | Lucide React |
-| Real-time | Server-Sent Events (SSE) |
+| Layer     | Technology                                      |
+| --------- | ----------------------------------------------- |
+| Framework | Next.js 16 (App Router)                         |
+| Language  | TypeScript 5                                    |
+| UI        | React 19, Tailwind CSS 4, shadcn/ui (Base Nova) |
+| Database  | SQLite (file-based)                             |
+| ORM       | Prisma 7 with LibSQL adapter                    |
+| Icons     | Lucide React                                    |
+| Real-time | Server-Sent Events (SSE)                        |
 
 ---
 
@@ -117,12 +117,12 @@ Open [http://localhost:3000](http://localhost:3000) to begin.
 
 ### Available Scripts
 
-| Script | Command | Description |
-|--------|---------|-------------|
-| `dev` | `npm run dev` | Start development server |
-| `build` | `npm run build` | Create production build |
-| `start` | `npm run start` | Run production server |
-| `lint` | `npm run lint` | Run ESLint |
+| Script  | Command         | Description              |
+| ------- | --------------- | ------------------------ |
+| `dev`   | `npm run dev`   | Start development server |
+| `build` | `npm run build` | Create production build  |
+| `start` | `npm run start` | Run production server    |
+| `lint`  | `npm run lint`  | Run ESLint               |
 
 ---
 
@@ -134,8 +134,8 @@ Create a `.env` file in the project root:
 DATABASE_URL="file:./dev.db"
 ```
 
-| Variable | Description | Default |
-|----------|-------------|---------|
+| Variable       | Description               | Default         |
+| -------------- | ------------------------- | --------------- |
 | `DATABASE_URL` | SQLite database file path | `file:./dev.db` |
 
 ---
@@ -146,38 +146,38 @@ DATABASE_URL="file:./dev.db"
 
 **Session**
 
-| Column | Type | Description |
-|--------|------|-------------|
-| `id` | UUID | Primary key |
-| `pairingCode` | String (unique) | 6-digit pairing code |
-| `status` | Enum | Current session state |
-| `integrityScore` | Int | 0–100, starts at 100 |
-| `createdAt` | DateTime | Auto-set on creation |
-| `updatedAt` | DateTime | Auto-updated |
+| Column           | Type            | Description           |
+| ---------------- | --------------- | --------------------- |
+| `id`             | UUID            | Primary key           |
+| `pairingCode`    | String (unique) | 6-digit pairing code  |
+| `status`         | Enum            | Current session state |
+| `integrityScore` | Int             | 0–100, starts at 100  |
+| `createdAt`      | DateTime        | Auto-set on creation  |
+| `updatedAt`      | DateTime        | Auto-updated          |
 
 **IntegritySignal**
 
-| Column | Type | Description |
-|--------|------|-------------|
-| `id` | Int (auto-increment) | Primary key |
-| `sessionId` | UUID (FK) | References Session |
-| `type` | String | Signal type (e.g. `ai_browser`, `extensions`) |
-| `severity` | String | `danger` / `warning` / `info` |
-| `metadata` | JSON | Additional signal data |
-| `source` | String | `electron` or `browser` |
-| `timestamp` | DateTime | When the signal was detected |
+| Column      | Type                 | Description                                   |
+| ----------- | -------------------- | --------------------------------------------- |
+| `id`        | Int (auto-increment) | Primary key                                   |
+| `sessionId` | UUID (FK)            | References Session                            |
+| `type`      | String               | Signal type (e.g. `ai_browser`, `extensions`) |
+| `severity`  | String               | `danger` / `warning` / `info`                 |
+| `metadata`  | JSON                 | Additional signal data                        |
+| `source`    | String               | `electron` or `browser`                       |
+| `timestamp` | DateTime             | When the signal was detected                  |
 
 **AssessmentResponse**
 
-| Column | Type | Description |
-|--------|------|-------------|
-| `id` | Int (auto-increment) | Primary key |
-| `sessionId` | UUID (FK) | References Session |
-| `questionId` | String | Reference to question bank |
-| `selectedOption` | Int | 0–3 (selected answer index) |
-| `responseTimeMs` | Int | Time taken in milliseconds |
-| `timingSeverity` | String | `normal` / `warning` / `suspicious` |
-| `answeredAt` | DateTime | When the answer was submitted |
+| Column           | Type                 | Description                         |
+| ---------------- | -------------------- | ----------------------------------- |
+| `id`             | Int (auto-increment) | Primary key                         |
+| `sessionId`      | UUID (FK)            | References Session                  |
+| `questionId`     | String               | Reference to question bank          |
+| `selectedOption` | Int                  | 0–3 (selected answer index)         |
+| `responseTimeMs` | Int                  | Time taken in milliseconds          |
+| `timingSeverity` | String               | `normal` / `warning` / `suspicious` |
+| `answeredAt`     | DateTime             | When the answer was submitted       |
 
 ### Session Status Enum
 
@@ -222,6 +222,7 @@ waiting_for_companion → paired → pre_check → ready → in_progress → pau
 Creates a new assessment session.
 
 **Response:**
+
 ```json
 {
   "sessionId": "uuid",
@@ -236,6 +237,7 @@ Creates a new assessment session.
 Pairs a companion app to an existing session.
 
 **Request Body:**
+
 ```json
 {
   "pairingCode": "123456"
@@ -249,6 +251,7 @@ Pairs a companion app to an existing session.
 ### `GET /api/session/[sessionId]/status`
 
 Opens a **Server-Sent Events** stream. Pushes real-time updates for:
+
 - Session status changes
 - New integrity signals
 
@@ -261,6 +264,7 @@ Sends the current status immediately on connection.
 Updates the session status.
 
 **Request Body:**
+
 ```json
 {
   "status": "in_progress",
@@ -277,6 +281,7 @@ Updates the session status.
 Returns the 10-question assessment. Only accessible when status is `ready` or `in_progress`.
 
 **Response:**
+
 ```json
 [
   {
@@ -295,6 +300,7 @@ Returns the 10-question assessment. Only accessible when status is `ready` or `i
 Submits an integrity signal.
 
 **Request Body:**
+
 ```json
 {
   "type": "ai_browser",
@@ -313,40 +319,41 @@ Submits an integrity signal.
 
 The `useBrowserDetector` hook performs continuous monitoring for:
 
-| Check | What it detects |
-|-------|----------------|
+| Check                | What it detects                                                                                      |
+| -------------------- | ---------------------------------------------------------------------------------------------------- |
 | AI browser detection | User agent patterns, CSS variables, and DOM artifacts for Claude, Comet, Arc, Atlas, Dia, Opera Neon |
-| Extension runtime | `chrome-extension://` or `moz-extension://` protocols |
-| Prototype tampering | Overridden `fetch`, `XMLHttpRequest`, `addEventListener`, etc. |
-| iframe embedding | Detects if the app is running inside an iframe |
-| DOM mutations | Injected scripts, iframes, or form elements |
-| Focus loss | Tab switches, window blur, visibility changes |
-| Keyboard shortcuts | `Ctrl+Enter`, `Ctrl+Shift+Space` (common AI triggers) |
-| Clipboard events | Copy, paste, and cut operations |
-| Webdriver / Cypress | Automated browser detection |
+| Extension runtime    | `chrome-extension://` or `moz-extension://` protocols                                                |
+| Prototype tampering  | Overridden `fetch`, `XMLHttpRequest`, `addEventListener`, etc.                                       |
+| iframe embedding     | Detects if the app is running inside an iframe                                                       |
+| DOM mutations        | Injected scripts, iframes, or form elements                                                          |
+| Focus loss           | Tab switches, window blur, visibility changes                                                        |
+| Keyboard shortcuts   | `Ctrl+Enter`, `Ctrl+Shift+Space` (common AI triggers)                                                |
+| Clipboard events     | Copy, paste, and cut operations                                                                      |
+| Webdriver / Cypress  | Automated browser detection                                                                          |
 
 ### Timing Analysis
 
 The `useTimingAnalyzer` hook flags suspiciously fast answers using category-specific thresholds:
 
 | Category | Suspicious if answered in less than |
-|----------|-------------------------------------|
-| Verbal | 6 seconds |
-| Math | 10 seconds |
-| Abstract | 8 seconds |
-| Spatial | 8 seconds |
+| -------- | ----------------------------------- |
+| Verbal   | 6 seconds                           |
+| Math     | 10 seconds                          |
+| Abstract | 8 seconds                           |
+| Spatial  | 8 seconds                           |
 
 Additional timing flags:
+
 - **3+ consecutive fast answers** triggers a warning
 - **>50% suspicious ratio** across all answers triggers an alert
 
 ### Integrity Score Deductions
 
-| Severity | Deduction | Example signals |
-|----------|-----------|----------------|
-| Danger | -15 points | AI browser detected, extensions found, prototype tampering |
-| Warning | -5 points | DOM mutations, focus loss, fast answers, clipboard usage |
-| Info | 0 points | Informational only |
+| Severity | Deduction  | Example signals                                            |
+| -------- | ---------- | ---------------------------------------------------------- |
+| Danger   | -15 points | AI browser detected, extensions found, prototype tampering |
+| Warning  | -5 points  | DOM mutations, focus loss, fast answers, clipboard usage   |
+| Info     | 0 points   | Informational only                                         |
 
 The score floors at **0** and cannot go negative.
 
@@ -356,12 +363,12 @@ The score floors at **0** and cannot go negative.
 
 10 multiple-choice questions across four categories:
 
-| Category | Count | Topics |
-|----------|-------|--------|
-| Verbal | 3 | Vocabulary, word relationships, analogies |
-| Math | 2 | Arithmetic, financial calculations, speed problems |
-| Abstract | 3 | Pattern recognition, logical reasoning |
-| Spatial | 2 | 3D visualization, geometric problem-solving |
+| Category | Count | Topics                                             |
+| -------- | ----- | -------------------------------------------------- |
+| Verbal   | 3     | Vocabulary, word relationships, analogies          |
+| Math     | 2     | Arithmetic, financial calculations, speed problems |
+| Abstract | 3     | Pattern recognition, logical reasoning             |
+| Spatial  | 2     | 3D visualization, geometric problem-solving        |
 
 Each question has 4 options (indices 0–3).
 
@@ -369,12 +376,12 @@ Each question has 4 options (indices 0–3).
 
 ## UI Components
 
-| Component | Purpose |
-|-----------|---------|
-| `LandingHero` | Home page entry point — creates a session on click |
-| `PairingCode` | Displays the 6-digit code for companion app pairing |
-| `PreCheckStatus` | Shows system check progress and blocking app list |
-| `AssessmentRunner` | Renders questions, tracks selections and timing |
-| `IntegrityBanner` | Persistent top bar showing live score and signal count |
-| `PausedOverlay` | Full-screen modal when the session is paused |
-| `CompletionSummary` | Final screen with integrity score and signal summary |
+| Component           | Purpose                                                |
+| ------------------- | ------------------------------------------------------ |
+| `LandingHero`       | Home page entry point — creates a session on click     |
+| `PairingCode`       | Displays the 6-digit code for companion app pairing    |
+| `PreCheckStatus`    | Shows system check progress and blocking app list      |
+| `AssessmentRunner`  | Renders questions, tracks selections and timing        |
+| `IntegrityBanner`   | Persistent top bar showing live score and signal count |
+| `PausedOverlay`     | Full-screen modal when the session is paused           |
+| `CompletionSummary` | Final screen with integrity score and signal summary   |

@@ -1,7 +1,7 @@
-import { prisma } from "./db";
-import { pushSSE } from "./sse";
-import { getSignalSeverity, recalculateScore } from "./integrity-scoring";
-import type { SessionStatus, SignalSource } from "./types";
+import { prisma } from './db';
+import { pushSSE } from './sse';
+import { getSignalSeverity, recalculateScore } from './integrity-scoring';
+import type { SessionStatus, SignalSource } from './types';
 
 export async function createSession() {
   const session = await prisma.session.create({
@@ -20,7 +20,7 @@ export async function getSession(id: string) {
 export async function updateSessionStatus(
   sessionId: string,
   status: SessionStatus,
-  details?: Record<string, unknown>
+  details?: Record<string, unknown>,
 ) {
   const session = await prisma.session.update({
     where: { id: sessionId },
@@ -28,7 +28,7 @@ export async function updateSessionStatus(
   });
 
   pushSSE(sessionId, {
-    event: "status",
+    event: 'status',
     status: session.status,
     integrityScore: session.integrityScore,
     details,
@@ -41,7 +41,7 @@ export async function addSignal(
   sessionId: string,
   type: string,
   metadata: Record<string, unknown>,
-  source: SignalSource
+  source: SignalSource,
 ) {
   const severity = getSignalSeverity(type);
 
@@ -70,7 +70,7 @@ export async function addSignal(
 
   // Push to SSE
   pushSSE(sessionId, {
-    event: "signal",
+    event: 'signal',
     signal: { type, severity, metadata, source },
     integrityScore: updated.integrityScore,
   });
@@ -83,7 +83,7 @@ export async function addResponse(
   questionId: string,
   selectedOption: number,
   responseTimeMs: number,
-  timingSeverity: string
+  timingSeverity: string,
 ) {
   return prisma.assessmentResponse.create({
     data: {
