@@ -10,7 +10,7 @@ export function IntegrityBanner({
   score,
   signalCount,
   electronConnected,
-}: IntegrityBannerProps) {
+}: Readonly<IntegrityBannerProps>) {
   const color =
     score > 70
       ? 'bg-green-500/10 text-green-600 border-green-500/20'

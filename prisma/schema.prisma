@@ -11,6 +11,7 @@ model Session {
   id             String               @id @default(uuid())
   status         String               @default("waiting_for_companion")
   integrityScore Int                  @default(100)
+  hardWarnings   Int                  @default(0)
   createdAt      DateTime             @default(now())
   updatedAt      DateTime             @updatedAt
   signals        IntegritySignal[]

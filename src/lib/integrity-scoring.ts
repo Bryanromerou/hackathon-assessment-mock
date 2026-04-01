@@ -34,6 +34,31 @@ const WARNING_TYPES = [
   'clipboard-large-content',
 ];
 
+// Hard warning types trigger the lockout mechanism.
+// After 5 hard warnings the user is permanently locked out.
+const HARD_WARNING_TYPES = [
+  // AI detection (browser + electron)
+  'ai-browser',
+  'extension-runtime',
+  'prototype-tamper',
+  'cheating-app-detected',
+  'cheating-app-installed',
+  'ai-network-request',
+  'process-detected',
+  'network-connection',
+  'app-installed',
+  'extension-installed',
+  // Integrity app closed
+  'companion-app-closed',
+  // Tab/window navigation — only non-suppressed signals reach the backend
+  // (switching to the companion app is allowed by the Electron suppression logic)
+  'focus-loss',
+];
+
+export function isHardWarning(signalType: string): boolean {
+  return HARD_WARNING_TYPES.includes(signalType);
+}
+
 export function getSignalSeverity(signalType: string): SignalSeverity {
   if (DANGER_TYPES.includes(signalType)) return 'danger';
   if (WARNING_TYPES.includes(signalType)) return 'warning';

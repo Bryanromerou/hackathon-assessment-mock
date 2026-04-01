@@ -9,7 +9,7 @@ export async function GET(
 
   const session = await prisma.session.findUnique({
     where: { id: sessionId },
-    select: { status: true, integrityScore: true },
+    select: { status: true, integrityScore: true, hardWarnings: true },
   });
 
   if (!session) {
@@ -19,5 +19,6 @@ export async function GET(
   return NextResponse.json({
     status: session.status,
     integrityScore: session.integrityScore,
+    hardWarnings: session.hardWarnings,
   });
 }

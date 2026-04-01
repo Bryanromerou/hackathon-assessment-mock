@@ -24,7 +24,7 @@ export async function POST(
   // so they continue to be recorded even during pause.
   if (
     type === 'answer-recorded' &&
-    (session.status === 'paused' || session.status === 'completed')
+    (session.status === 'paused' || session.status === 'hard_warning' || session.status === 'locked_out' || session.status === 'completed')
   ) {
     return NextResponse.json(
       { error: 'Session is not active' },
