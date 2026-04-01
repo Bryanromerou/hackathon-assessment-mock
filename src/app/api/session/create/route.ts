@@ -1,5 +1,5 @@
-import { NextResponse } from "next/server";
-import { createSession } from "@/lib/sessions";
+import { NextResponse } from 'next/server';
+import { createSession } from '@/lib/sessions';
 
 export async function POST() {
   const session = await createSession();

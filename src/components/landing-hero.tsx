@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 export function LandingHero() {
   const router = useRouter();
@@ -12,7 +12,7 @@ export function LandingHero() {
   async function handleStart() {
     setLoading(true);
     try {
-      const res = await fetch("/api/session/create", { method: "POST" });
+      const res = await fetch('/api/session/create', { method: 'POST' });
       const data = await res.json();
       router.push(`/assessment?session=${data.sessionId}`);
     } catch {
@@ -43,7 +43,7 @@ export function LandingHero() {
             disabled={loading}
             className="w-full max-w-xs"
           >
-            {loading ? "Creating session..." : "Start Assessment"}
+            {loading ? 'Creating session...' : 'Start Assessment'}
           </Button>
         </CardContent>
       </Card>

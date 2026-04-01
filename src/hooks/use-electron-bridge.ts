@@ -1,12 +1,18 @@
-"use client";
+'use client';
 
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState, useCallback } from 'react';
 
-const ELECTRON_WS_URL = "ws://localhost:18329";
+const ELECTRON_WS_URL = 'ws://localhost:18329';
 const RECONNECT_DELAY_MS = 3000;
 const PING_INTERVAL_MS = 10000;
 const DISCONNECT_GRACE_MS = 5000;
-const ACTIVE_STATUSES = ["paired", "pre_check", "ready", "in_progress", "paused"];
+const ACTIVE_STATUSES = [
+  'paired',
+  'pre_check',
+  'ready',
+  'in_progress',
+  'paused',
+];
 
 interface ElectronBridgeState {
   connected: boolean;
@@ -19,7 +25,11 @@ interface ElectronBridgeState {
  * can auto-pair with the assessment backend. Also forwards browser-detected
  * signals to Electron's local WS server.
  */
-export function useElectronBridge(enabled: boolean, sessionId: string | null, currentStatus?: string) {
+export function useElectronBridge(
+  enabled: boolean,
+  sessionId: string | null,
+  currentStatus?: string,
+) {
   const [state, setState] = useState<ElectronBridgeState>({
     connected: false,
     electronReady: false,
@@ -27,7 +37,9 @@ export function useElectronBridge(enabled: boolean, sessionId: string | null, cu
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pingTimer = useRef<ReturnType<typeof setInterval> | null>(null);
-  const disconnectGraceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const disconnectGraceTimer = useRef<ReturnType<typeof setTimeout> | null>(
+    null,
+  );
   const enabledRef = useRef(enabled);
   enabledRef.current = enabled;
   const sessionIdRef = useRef(sessionId);
@@ -78,16 +90,16 @@ export function useElectronBridge(enabled: boolean, sessionId: string | null, cu
         if (sessionIdRef.current) {
           ws.send(
             JSON.stringify({
-              type: "auto-pair",
+              type: 'auto-pair',
               payload: { sessionId: sessionIdRef.current },
-            })
+            }),
           );
         }
 
         // Start keepalive pings
         pingTimer.current = setInterval(() => {
           if (ws.readyState === WebSocket.OPEN) {
-            ws.send(JSON.stringify({ type: "ping" }));
+            ws.send(JSON.stringify({ type: 'ping' }));
           }
         }, PING_INTERVAL_MS);
       };
@@ -95,7 +107,7 @@ export function useElectronBridge(enabled: boolean, sessionId: string | null, cu
       ws.onmessage = (event) => {
         try {
           const msg = JSON.parse(event.data);
-          if (msg.type === "handshake") {
+          if (msg.type === 'handshake') {
             setState((prev) => ({ ...prev, electronReady: true }));
           }
         } catch {
@@ -113,26 +125,26 @@ export function useElectronBridge(enabled: boolean, sessionId: string | null, cu
         // If the assessment is active, start a grace period before flagging
         // the companion app as closed (treated like AI service detection)
         const sid = sessionIdRef.current;
-        if (sid && ACTIVE_STATUSES.includes(statusRef.current ?? "")) {
+        if (sid && ACTIVE_STATUSES.includes(statusRef.current ?? '')) {
           disconnectGraceTimer.current = setTimeout(async () => {
             try {
               await fetch(`/api/session/${sid}/signal`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                  type: "companion-app-closed",
-                  metadata: { reason: "browser-detected-disconnect" },
-                  source: "browser",
+                  type: 'companion-app-closed',
+                  metadata: { reason: 'browser-detected-disconnect' },
+                  source: 'browser',
                 }),
               });
               await fetch(`/api/session/${sid}/status`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                  status: "paused",
+                  status: 'paused',
                   details: {
-                    reason: "companion-app-closed",
-                    apps: ["Integrity Companion App"],
+                    reason: 'companion-app-closed',
+                    apps: ['Integrity Companion App'],
                   },
                 }),
               });
@@ -180,23 +192,23 @@ export function useElectronBridge(enabled: boolean, sessionId: string | null, cu
       if (wsRef.current?.readyState === WebSocket.OPEN) {
         wsRef.current.send(
           JSON.stringify({
-            type: "signal",
+            type: 'signal',
             payload: {
               type: signal.type,
               metadata: signal.metadata,
-              source: "browser",
+              source: 'browser',
             },
-          })
+          }),
         );
       }
     },
-    []
+    [],
   );
 
   const sendStatus = useCallback((status: string) => {
     if (wsRef.current?.readyState === WebSocket.OPEN) {
       wsRef.current.send(
-        JSON.stringify({ type: "status-update", payload: { status } })
+        JSON.stringify({ type: 'status-update', payload: { status } }),
       );
     }
   }, []);

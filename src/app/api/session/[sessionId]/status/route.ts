@@ -1,17 +1,17 @@
-import { NextResponse } from "next/server";
-import { getSession, updateSessionStatus } from "@/lib/sessions";
-import { setSSEController, removeSSEController } from "@/lib/sse";
-import type { SessionStatus } from "@/lib/types";
+import { NextResponse } from 'next/server';
+import { getSession, updateSessionStatus } from '@/lib/sessions';
+import { setSSEController, removeSSEController } from '@/lib/sse';
+import type { SessionStatus } from '@/lib/types';
 
 export async function GET(
   _request: Request,
-  { params }: { params: Promise<{ sessionId: string }> }
+  { params }: { params: Promise<{ sessionId: string }> },
 ) {
   const { sessionId } = await params;
   const session = await getSession(sessionId);
 
   if (!session) {
-    return NextResponse.json({ error: "Session not found" }, { status: 404 });
+    return NextResponse.json({ error: 'Session not found' }, { status: 404 });
   }
 
   const stream = new ReadableStream({
@@ -20,7 +20,7 @@ export async function GET(
 
       // Send current status immediately
       const data = `data: ${JSON.stringify({
-        event: "status",
+        event: 'status',
         status: session.status,
         integrityScore: session.integrityScore,
       })}\n\n`;
@@ -33,34 +33,31 @@ export async function GET(
 
   return new Response(stream, {
     headers: {
-      "Content-Type": "text/event-stream",
-      "Cache-Control": "no-cache",
-      Connection: "keep-alive",
+      'Content-Type': 'text/event-stream',
+      'Cache-Control': 'no-cache',
+      Connection: 'keep-alive',
     },
   });
 }
 
 export async function POST(
   request: Request,
-  { params }: { params: Promise<{ sessionId: string }> }
+  { params }: { params: Promise<{ sessionId: string }> },
 ) {
   const { sessionId } = await params;
   const body = await request.json();
   const { status, details } = body;
 
   if (!status) {
-    return NextResponse.json(
-      { error: "status is required" },
-      { status: 400 }
-    );
+    return NextResponse.json({ error: 'status is required' }, { status: 400 });
   }
 
   // Prevent status regression once a session is completed
   const existing = await getSession(sessionId);
   if (!existing) {
-    return NextResponse.json({ error: "Session not found" }, { status: 404 });
+    return NextResponse.json({ error: 'Session not found' }, { status: 404 });
   }
-  if (existing.status === "completed") {
+  if (existing.status === 'completed') {
     return NextResponse.json({
       sessionId: existing.id,
       status: existing.status,
@@ -71,7 +68,7 @@ export async function POST(
   const session = await updateSessionStatus(
     sessionId,
     status as SessionStatus,
-    details
+    details,
   );
 
   return NextResponse.json({
