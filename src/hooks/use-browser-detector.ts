@@ -220,16 +220,23 @@ export function useBrowserDetector(enabled: boolean, onSignal: SignalCallback) {
     const handleVisibility = () => {
       if (document.visibilityState === 'hidden') {
         emit('focus-loss', { source: 'visibilitychange' });
+      } else if (document.visibilityState === 'visible') {
+        emit('focus-gain', { source: 'visibilitychange' });
       }
     };
     const handleBlur = () => {
       emit('focus-loss', { source: 'blur' });
     };
+    const handleFocus = () => {
+      emit('focus-gain', { source: 'focus' });
+    };
     document.addEventListener('visibilitychange', handleVisibility);
     window.addEventListener('blur', handleBlur);
+    window.addEventListener('focus', handleFocus);
     cleanups.push(
       () => document.removeEventListener('visibilitychange', handleVisibility),
       () => window.removeEventListener('blur', handleBlur),
+      () => window.removeEventListener('focus', handleFocus),
     );
 
     // Keyboard shortcut monitoring

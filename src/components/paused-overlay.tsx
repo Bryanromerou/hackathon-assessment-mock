@@ -7,6 +7,7 @@ interface PausedOverlayProps {
 export function PausedOverlay({ details }: PausedOverlayProps) {
   const apps = (details?.apps as string[]) ?? [];
   const isCompanionClosed = details?.reason === 'companion-app-closed';
+  const isFocusLoss = apps.some((a) => a === 'Focus left assessment window');
   const reason =
     apps.length > 0
       ? apps.join(', ')
@@ -33,7 +34,18 @@ export function PausedOverlay({ details }: PausedOverlayProps) {
         <h2 className="text-2xl font-bold text-destructive">
           Assessment Paused
         </h2>
-        {isCompanionClosed ? (
+        {isFocusLoss ? (
+          <>
+            <p className="text-muted-foreground">
+              You navigated away from the assessment. Please return to the
+              assessment tab to continue.
+            </p>
+            <p className="text-sm text-muted-foreground">
+              The assessment will automatically resume when focus returns to
+              this window.
+            </p>
+          </>
+        ) : isCompanionClosed ? (
           <>
             <p className="text-muted-foreground">
               The <strong>Integrity Companion App</strong> has been closed.

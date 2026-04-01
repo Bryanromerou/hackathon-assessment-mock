@@ -41,6 +41,11 @@ export function AssessmentRunner({
       // Forward to Electron companion app via WebSocket
       sendToElectron(signal);
 
+      // Delegate focus events to Electron — it can distinguish switching to the
+      // companion app (allowed) from switching to another tab/app (flagged),
+      // and handles pause/resume accordingly.
+      if (signal.type === 'focus-loss' || signal.type === 'focus-gain') return;
+
       // Also send directly to the assessment API
       try {
         await fetch(`/api/session/${sessionId}/signal`, {
