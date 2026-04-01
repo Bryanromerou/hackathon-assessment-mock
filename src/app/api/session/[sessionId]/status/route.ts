@@ -23,6 +23,7 @@ export async function GET(
         event: 'status',
         status: session.status,
         integrityScore: session.integrityScore,
+        hardWarnings: session.hardWarnings,
       })}\n\n`;
       controller.enqueue(new TextEncoder().encode(data));
     },
@@ -57,7 +58,21 @@ export async function POST(
   if (!existing) {
     return NextResponse.json({ error: 'Session not found' }, { status: 404 });
   }
-  if (existing.status === 'completed') {
+  // hard_warning can only be exited by an explicit user acknowledgement
+  // (the HardWarningOverlay's "Continue Assessment" button sends acknowledgeWarning: true).
+  // This prevents Electron's auto-resume from bypassing the warning screen.
+  if (existing.status === 'hard_warning') {
+    if (status === 'in_progress' && body.acknowledgeWarning) {
+      // Allow — user clicked Continue
+    } else {
+      return NextResponse.json({
+        sessionId: existing.id,
+        status: existing.status,
+        integrityScore: existing.integrityScore,
+      });
+    }
+  }
+  if (existing.status === 'locked_out' || existing.status === 'completed') {
     return NextResponse.json({
       sessionId: existing.id,
       status: existing.status,

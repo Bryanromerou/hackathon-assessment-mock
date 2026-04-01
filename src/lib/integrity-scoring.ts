@@ -21,6 +21,7 @@ const DANGER_TYPES = [
 const WARNING_TYPES = [
   // Browser-detected
   'dom-mutation',
+  // TODO: 'focus-loss' should become a hard warning in the future (tab navigation detection)
   'focus-loss',
   'suspicious-shortcut',
   'clipboard-event',
@@ -33,6 +34,29 @@ const WARNING_TYPES = [
   'clipboard-suspicious-content',
   'clipboard-large-content',
 ];
+
+// Hard warning types trigger the lockout mechanism.
+// After 5 hard warnings the user is permanently locked out.
+const HARD_WARNING_TYPES = [
+  // AI detection (browser + electron)
+  'ai-browser',
+  'extension-runtime',
+  'prototype-tamper',
+  'cheating-app-detected',
+  'cheating-app-installed',
+  'ai-network-request',
+  'process-detected',
+  'network-connection',
+  'app-installed',
+  'extension-installed',
+  // Integrity app closed
+  'companion-app-closed',
+  // TODO: Add 'focus-loss' here once tab-navigation is classified as a hard warning
+];
+
+export function isHardWarning(signalType: string): boolean {
+  return HARD_WARNING_TYPES.includes(signalType);
+}
 
 export function getSignalSeverity(signalType: string): SignalSeverity {
   if (DANGER_TYPES.includes(signalType)) return 'danger';

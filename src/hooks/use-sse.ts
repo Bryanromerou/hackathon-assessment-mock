@@ -13,6 +13,7 @@ interface SSESignal {
 interface SSEState {
   status: SessionStatus;
   integrityScore: number;
+  hardWarnings: number;
   signals: SSESignal[];
   connected: boolean;
   details?: Record<string, unknown>;
@@ -24,6 +25,7 @@ export function useSSE(sessionId: string | null) {
   const [state, setState] = useState<SSEState>({
     status: 'waiting_for_companion',
     integrityScore: 100,
+    hardWarnings: 0,
     signals: [],
     connected: false,
   });
@@ -57,12 +59,14 @@ export function useSSE(sessionId: string | null) {
             ...prev,
             status: data.status,
             integrityScore: data.integrityScore ?? prev.integrityScore,
+            hardWarnings: data.hardWarnings ?? prev.hardWarnings,
             details: data.details,
           }));
         } else if (data.event === 'signal') {
           setState((prev) => ({
             ...prev,
             integrityScore: data.integrityScore ?? prev.integrityScore,
+            hardWarnings: data.hardWarnings ?? prev.hardWarnings,
             signals: [...prev.signals, data.signal],
           }));
         }
@@ -96,12 +100,14 @@ export function useSSE(sessionId: string | null) {
         setState((prev) => {
           if (
             data.status !== prev.status ||
-            data.integrityScore !== prev.integrityScore
+            data.integrityScore !== prev.integrityScore ||
+            data.hardWarnings !== prev.hardWarnings
           ) {
             return {
               ...prev,
               status: data.status,
               integrityScore: data.integrityScore,
+              hardWarnings: data.hardWarnings ?? prev.hardWarnings,
             };
           }
           return prev;

@@ -5,6 +5,8 @@ export type SessionStatus =
   | 'ready'
   | 'in_progress'
   | 'paused'
+  | 'hard_warning'
+  | 'locked_out'
   | 'completed';
 
 export type SignalSeverity = 'danger' | 'warning' | 'info';

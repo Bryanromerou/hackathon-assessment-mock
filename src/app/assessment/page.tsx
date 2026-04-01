@@ -9,6 +9,8 @@ import { PreCheckStatus } from '@/components/pre-check-status';
 import { AssessmentRunner } from '@/components/assessment-runner';
 import { IntegrityBanner } from '@/components/integrity-banner';
 import { PausedOverlay } from '@/components/paused-overlay';
+import { HardWarningOverlay } from '@/components/hard-warning-overlay';
+import { LockedOutOverlay } from '@/components/locked-out-overlay';
 import { CompletionSummary } from '@/components/completion-summary';
 import { Button } from '@/components/ui/button';
 import type { Question } from '@/lib/types';
@@ -19,7 +21,7 @@ function AssessmentContent() {
   const [questions, setQuestions] = useState<Question[]>([]);
   const [started, setStarted] = useState(false);
 
-  const { status, integrityScore, signals, connected, details } =
+  const { status, integrityScore, hardWarnings, signals, connected, details } =
     useSSE(sessionId);
   const {
     connected: electronConnected,
@@ -74,6 +76,20 @@ function AssessmentContent() {
     );
   }
 
+  // Derive whether blocking processes are still active from signal history.
+  // Used to disable the "Continue Assessment" button on the hard warning overlay.
+  const hasActiveBlockers = (() => {
+    const active = new Set<string>();
+    for (const s of signals) {
+      if (s.type === 'process-detected') {
+        active.add(s.metadata.name as string);
+      } else if (s.type === 'process-disappeared') {
+        active.delete(s.metadata.name as string);
+      }
+    }
+    return active.size > 0 || !electronConnected;
+  })();
+
   const showBanner = status !== 'waiting_for_companion';
 
   return (
@@ -112,12 +128,13 @@ function AssessmentContent() {
 
         {(status === 'in_progress' ||
           status === 'paused' ||
+          status === 'hard_warning' ||
           (status === 'ready' && started)) &&
           questions.length > 0 && (
             <AssessmentRunner
               questions={questions}
               sessionId={sessionId}
-              paused={status === 'paused'}
+              paused={status === 'paused' || status === 'hard_warning'}
               onComplete={handleComplete}
             />
           )}
@@ -131,7 +148,17 @@ function AssessmentContent() {
         )}
       </main>
 
+      {status === 'hard_warning' && (
+        <HardWarningOverlay
+          sessionId={sessionId}
+          hardWarnings={hardWarnings}
+          details={details}
+          hasActiveBlockers={hasActiveBlockers}
+          onContinue={() => {}}
+        />
+      )}
       {status === 'paused' && <PausedOverlay details={details} />}
+      {status === 'locked_out' && <LockedOutOverlay />}
     </div>
   );
 }
