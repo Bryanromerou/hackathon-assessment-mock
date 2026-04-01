@@ -14,7 +14,6 @@ export function LandingHero() {
     try {
       const res = await fetch("/api/session/create", { method: "POST" });
       const data = await res.json();
-      sessionStorage.setItem(`pairing-${data.sessionId}`, data.pairingCode);
       router.push(`/assessment?session=${data.sessionId}`);
     } catch {
       setLoading(false);

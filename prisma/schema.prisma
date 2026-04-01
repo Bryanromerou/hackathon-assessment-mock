@@ -9,7 +9,6 @@ datasource db {
 
 model Session {
   id             String               @id @default(uuid())
-  pairingCode    String               @unique
   status         String               @default("waiting_for_companion")
   integrityScore Int                  @default(100)
   createdAt      DateTime             @default(now())
