@@ -15,13 +15,16 @@ import { CompletionSummary } from '@/components/completion-summary';
 import { Button } from '@/components/ui/button';
 import type { Question } from '@/lib/types';
 
+const isBannerForcedHidden =
+  process.env.NEXT_PUBLIC_FORCE_HIDE_BANNER === 'true';
+
 function AssessmentContent() {
   const searchParams = useSearchParams();
   const sessionId = searchParams.get('session');
   const [questions, setQuestions] = useState<Question[]>([]);
   const [started, setStarted] = useState(false);
 
-  const { status, integrityScore, hardWarnings, signals, connected, details } =
+  const { status, integrityScore, hardWarnings, signals, details } =
     useSSE(sessionId);
   const {
     connected: electronConnected,
@@ -90,7 +93,8 @@ function AssessmentContent() {
     return active.size > 0 || !electronConnected;
   })();
 
-  const showBanner = status !== 'waiting_for_companion';
+  const showBanner =
+    status !== 'waiting_for_companion' && !isBannerForcedHidden;
 
   return (
     <div className="min-h-screen flex flex-col">
