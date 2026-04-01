@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { useTimingAnalyzer } from "@/hooks/use-timing-analyzer";
 import { useBrowserDetector } from "@/hooks/use-browser-detector";
+import { useElectronBridge } from "@/hooks/use-electron-bridge";
 import type { Question } from "@/lib/types";
 
 interface AssessmentRunnerProps {
@@ -31,8 +32,14 @@ export function AssessmentRunner({
   const [elapsed, setElapsed] = useState(0);
   const timerRef = useRef<ReturnType<typeof setInterval>>(null);
 
+  const { sendSignal: sendToElectron } = useElectronBridge(true);
+
   const sendSignal = useCallback(
     async (signal: { type: string; metadata: Record<string, unknown> }) => {
+      // Forward to Electron companion app via WebSocket
+      sendToElectron(signal);
+
+      // Also send directly to the assessment API
       try {
         await fetch(`/api/session/${sessionId}/signal`, {
           method: "POST",
@@ -43,7 +50,7 @@ export function AssessmentRunner({
         /* best effort */
       }
     },
-    [sessionId]
+    [sessionId, sendToElectron]
   );
 
   const { startQuestion, endQuestion } = useTimingAnalyzer(sendSignal);

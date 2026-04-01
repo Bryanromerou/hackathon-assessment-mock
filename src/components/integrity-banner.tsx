@@ -3,9 +3,10 @@
 interface IntegrityBannerProps {
   score: number;
   signalCount: number;
+  electronConnected?: boolean;
 }
 
-export function IntegrityBanner({ score, signalCount }: IntegrityBannerProps) {
+export function IntegrityBanner({ score, signalCount, electronConnected }: IntegrityBannerProps) {
   const color =
     score > 70
       ? "bg-green-500/10 text-green-600 border-green-500/20"
@@ -37,6 +38,18 @@ export function IntegrityBanner({ score, signalCount }: IntegrityBannerProps) {
         <span className="font-medium">{label}</span>
       </div>
       <div className="flex items-center gap-4">
+        {electronConnected !== undefined && (
+          <span className="flex items-center gap-1.5">
+            <span
+              className={`h-1.5 w-1.5 rounded-full ${
+                electronConnected ? "bg-blue-400" : "bg-gray-400"
+              }`}
+            />
+            <span className="text-xs opacity-70">
+              {electronConnected ? "Companion" : "No companion"}
+            </span>
+          </span>
+        )}
         <span>
           Score: <strong>{score}</strong>
         </span>

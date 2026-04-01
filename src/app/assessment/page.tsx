@@ -3,6 +3,7 @@
 import { useSearchParams } from "next/navigation";
 import { useState, useEffect, useCallback, Suspense } from "react";
 import { useSSE } from "@/hooks/use-sse";
+import { useElectronBridge } from "@/hooks/use-electron-bridge";
 import { PairingCode } from "@/components/pairing-code";
 import { PreCheckStatus } from "@/components/pre-check-status";
 import { AssessmentRunner } from "@/components/assessment-runner";
@@ -21,6 +22,9 @@ function AssessmentContent() {
 
   const { status, integrityScore, signals, connected, details } =
     useSSE(sessionId);
+  const { connected: electronConnected } = useElectronBridge(
+    status !== "waiting_for_companion" && status !== "completed"
+  );
 
   // Fetch the pairing code on mount
   useEffect(() => {
@@ -95,7 +99,7 @@ function AssessmentContent() {
   return (
     <div className="min-h-screen flex flex-col">
       {showBanner && (
-        <IntegrityBanner score={integrityScore} signalCount={signals.length} />
+        <IntegrityBanner score={integrityScore} signalCount={signals.length} electronConnected={electronConnected} />
       )}
 
       <main className="flex-1 flex items-center justify-center p-6">

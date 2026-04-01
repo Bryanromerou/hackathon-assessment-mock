@@ -1,6 +1,7 @@
 import type { SignalSeverity } from "./types";
 
 const DANGER_TYPES = [
+  // Browser-detected
   "ai-browser",
   "extension-runtime",
   "prototype-tamper",
@@ -9,15 +10,27 @@ const DANGER_TYPES = [
   "cheating-app-detected",
   "cheating-app-installed",
   "ai-network-request",
+  // Electron-detected
+  "process-detected",
+  "network-connection",
+  "app-installed",
+  "extension-installed",
 ];
 
 const WARNING_TYPES = [
+  // Browser-detected
   "dom-mutation",
   "focus-loss",
   "suspicious-shortcut",
   "clipboard-event",
   "fast-answer",
   "clipboard-change",
+  // Electron-detected
+  "multi-display",
+  "display-change",
+  "clipboard-rapid-change",
+  "clipboard-suspicious-content",
+  "clipboard-large-content",
 ];
 
 export function getSignalSeverity(signalType: string): SignalSeverity {
