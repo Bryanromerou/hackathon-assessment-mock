@@ -13,6 +13,7 @@ import type { Question } from "@/lib/types";
 interface AssessmentRunnerProps {
   questions: Question[];
   sessionId: string;
+  paused?: boolean;
   onComplete: () => void;
 }
 
@@ -26,6 +27,7 @@ const CATEGORY_COLORS: Record<string, string> = {
 export function AssessmentRunner({
   questions,
   sessionId,
+  paused = false,
   onComplete,
 }: AssessmentRunnerProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -77,7 +79,7 @@ export function AssessmentRunner({
   }, [currentIndex, question, startQuestion]);
 
   async function handleAnswer(optionIndex: number) {
-    if (!question) return;
+    if (!question || paused) return;
 
     if (timerRef.current) clearInterval(timerRef.current);
 

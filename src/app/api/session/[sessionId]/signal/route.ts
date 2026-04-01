@@ -25,6 +25,19 @@ export async function POST(
     );
   }
 
+  // Reject answer submissions when the session is paused or completed.
+  // Integrity signals (from Electron/browser detectors) are still allowed
+  // so they continue to be recorded even during pause.
+  if (
+    type === "answer-recorded" &&
+    (session.status === "paused" || session.status === "completed")
+  ) {
+    return NextResponse.json(
+      { error: "Session is not active" },
+      { status: 403 }
+    );
+  }
+
   const updated = await addSignal(
     sessionId,
     type,

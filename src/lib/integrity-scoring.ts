@@ -15,6 +15,7 @@ const DANGER_TYPES = [
   "network-connection",
   "app-installed",
   "extension-installed",
+  "companion-app-closed",
 ];
 
 const WARNING_TYPES = [

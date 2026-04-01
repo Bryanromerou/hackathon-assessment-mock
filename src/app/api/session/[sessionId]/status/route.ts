@@ -55,6 +55,19 @@ export async function POST(
     );
   }
 
+  // Prevent status regression once a session is completed
+  const existing = await getSession(sessionId);
+  if (!existing) {
+    return NextResponse.json({ error: "Session not found" }, { status: 404 });
+  }
+  if (existing.status === "completed") {
+    return NextResponse.json({
+      sessionId: existing.id,
+      status: existing.status,
+      integrityScore: existing.integrityScore,
+    });
+  }
+
   const session = await updateSessionStatus(
     sessionId,
     status as SessionStatus,
